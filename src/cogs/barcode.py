@@ -121,15 +121,14 @@ class Battle:
     def actionByCommand(self, commandq):
         act1 = commandq.pop(self.p1.getName()) % 3
         act2 = commandq.pop(self.p2.getName()) % 3 
-        if act1 == act2:
-            self.p1.setHp(self.p1.getHp() - self.p2.getAtk())
-            self.p2.setHp(self.p2.getHp() - self.p1.getAtk())
-        elif (act1 + 1) % 3  == act2:
+        if (act1 + 1) % 3  == act2:
             self.p2.setAtk(self.p2.getAtk() * 2)
             self.p1.setAtk(max(1, self.p1.getAtk() / ((10000 - self.p1.getDef())/100)))
-        else:
+        elif (act1 + 2) % 3 == act2:
             self.p1.setAtk(self.p1.getAtk() * 2)
             self.p2.setAtk(max(1, self.p2.getAtk() / ((10000 - self.p2.getDef())/100)))
+        self.p1.setHp(self.p1.getHp() - self.p2.getAtk())
+        self.p2.setHp(self.p2.getHp() - self.p1.getAtk())
 
         results = "next"
         if self.p1.getHp() <= 0 and self.p2.getHp() <= 0:
