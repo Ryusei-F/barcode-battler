@@ -10,7 +10,12 @@ from discord.ext import commands
 
 def convert_image_to_seeds(url):
     image = Image.open(io.BytesIO(requests.get(url).content))
-    codes = zbarlight.scan_codes(['ean13'], image)
+    ctype_list = ['ean13', 'upca', 'ean8', 'upce', 'code128', 'i25']
+    codes = None
+    for ctype in ctype_list:
+        if zbarlight.scan_codes([ctype], image) is not None:
+            codes = zbarlight.scan_codes([ctype], image)
+            break
     if codes != None:
         return (int(codes[0].decode()))
     else:
@@ -104,6 +109,9 @@ class BattleManager:
             score += (f'{key}').ljust(10) + ":" + (f'{self.player_list[key][1]}').center(10) + "wins\n"
         score += "```"
         return score
+
+    def getPlayer(self, player_name):
+        return self.player_list[player_name][0]
         
 
 class Battle:

@@ -1,11 +1,15 @@
 #-*- coding: utf-8 -*-
 import discord
+import os
 from discord.ext import commands
 from . import barcode
+from . import boss
 
 class Commands(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+        self.raid_num = 0
+        self.boss = boss.Boss(self.raid_num)
         self.manager = barcode.BattleManager()
 
     @commands.command()
@@ -61,8 +65,17 @@ class Commands(commands.Cog):
                     if seeds:
                         self.manager.updatePlayerList(name, seeds)
                         await message.channel.send(self.manager.getStatus(name))
-                    else:
-                        await message.channel.send('バーコード画像を送信してください')
+
+                        self.boss.attackedBy(self.manager.getPlayer(name))
+                        if self.boss.getHp() > 0:
+                            send_str = 'レイドボス{} ({} / {}) \n'.format(self.raid_num+1, self.boss.getHp(), self.boss.getdHp())
+                            send_str += '[||' + '　' * self.boss.ratio_of_hp() + '||' + '　' * (10 - self.boss.ratio_of_hp()) + ']'
+                            await message.channel.send(send_str)
+                        if self.boss.getHp() <= 0:
+                            await message.channel.send('``` レイドボス{}討伐成功 ```'.format(self.raid_num+1))
+                            self.raid_num += 1
+                            self.boss = boss.Boss(self.raid_num)
+
 
         if message.content:
             if self.manager.existsBattle():
